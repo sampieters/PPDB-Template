@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Dynamically sets the page title based on app_data dictionary -->
+    <title>{{ app_data['app_name'] }}</title>
+
+    <!-- Favicon for the web page -->
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+
+        <!-- Bootstrap 5 for styling -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!--  Google's Material for icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <!-- Custom CSS file for additional styling -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='custom.css') }}">
+    
+    <!-- React and ReactDOM CDN -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+    <!-- Babel for JSX transpiling -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js"></script>
+
+    <!-- Axios CDN for API requests -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // The `app_data` passed from Flask is available in this script
+        const appName = "{{ app_data['app_name'] }}";
+        console.log("App Name from Flask: ", appName);
+
+        const { useState, useEffect } = React;
+
+        function BookManagement() {
+            const [books, setBooks] = useState([]);
+            const [title, setTitle] = useState('');
+            const [author, setAuthor] = useState('');
+
+            // Fetch books when the component loads
+            useEffect(() => {
+                loadBooks();
+            }, []);
+
+            const loadBooks = async () => {
+                try {
+                    const response = await axios.get('/books');
+                    setBooks(response.data);
+                } catch (error) {
+                    console.error('Error fetching books:', error);
+                }
+            };
+
+            const addBook = async (e) => {
+                e.preventDefault();
+                if (!title || !author) return;
+
+                try {
+                    await axios.post('/books', { title, author });
+                    setTitle('');
+                    setAuthor('');
+                    loadBooks(); // Refresh the list after adding a book
+                } catch (error) {
+                    console.error('Error adding book:', error);
+                }
+            };
+
+            const deleteBook = async (id) => {
+                try {
+                    await axios.delete(`/books/${id}`);
+                    loadBooks(); // Refresh the list after deleting a book
+                } catch (error) {
+                    console.error('Error deleting book:', error);
+                }
+            };
+
+            return (
+                <div>
+                    
+                    {/* Include a header template */}
+                    {% include 'header.html' %}
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col">
+                                <a href="/" class="text-decoration-none">
+                                    <span class="material-icons">home</span> Show main
+                                </a>
+                            </div>
+                        </div>
+
+                        {/* Add Book Form */}
+                        <div className="row">
+                            <div class="borderme col-md-5 me-4">
+                                <h3>Add book:</h3>
+                                <div className="row">
+                                    <div className="col">
+                                        <form onSubmit={addBook}>
+                                            <div class="row">
+                                                <div class="col">
+                                                    Title: <input
+                                                    type="text"
+                                                    name="title"
+                                                    id="title"
+                                                    value={title}
+                                                    onChange={(e) => setTitle(e.target.value)}
+                                                    className="form-control mb-2"
+                                                    placeholder="A New Book"
+                                                    required
+                                                    />
+                                                </div>
+
+                                                <div class="col">
+                                                    Author: <input
+                                                    type="text"
+                                                    name="author"
+                                                    id="author"
+                                                    value={author}
+                                                    onChange={(e) => setAuthor(e.target.value)}
+                                                    className="form-control mb-2"
+                                                    placeholder="John/Jane Doe"
+                                                    required
+                                                    />
+                                                </div>
+                                            </div>
+                                            <button type="submit" className="btn btn-success mt-2">Submit</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Books List */}
+                        <div class="row">
+                            <div class="borderme col-md-12">
+                                <h3>Books in library:</h3>
+                                <div className="row">
+                                    {books.length === 0 ? (
+                                        <p>No books available</p>
+                                    ) : (
+                                        books.map((book) => (
+                                            <div className="col-md-4 mb-3" key={book.id}>
+                                                <div className="card">
+                                                    <div className="card-body">
+                                                        <h5 className="card-title">{book.title}</h5>
+                                                        <p className="card-text">{book.author}</p>
+                                                        <button
+                                                            className="btn btn-danger"
+                                                            onClick={() => deleteBook(book.id)}
+                                                        >
+                                                            Delete
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Include a footer template */}
+                    {% include 'footer.html' %}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<BookManagement />, document.getElementById('root'));
+    </script>
+</body>
+</html>

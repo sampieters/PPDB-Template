@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Dynamically sets the page title based on app_data dictionary -->
+    <title>{{ app_data['app_name'] }}</title>
+
+    <!-- Favicon for the web page -->
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+
+     <!-- Bootstrap 5 for styling -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!--  Google's Material for icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <!-- Custom CSS file for additional styling -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='custom.css') }}">
+
+    <!-- Vue -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.3.4/dist/vue.global.prod.js"></script>
+
+    <!-- Axios CDN for API requests -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+
+    <div id="app"></div>
+
+    <script>
+        const { createApp } = Vue;
+
+        // Define the app component
+        const app = {
+            data() {
+                return {
+                    appName: "{{ app_data['app_name'] }}",
+                    books: [],
+                    title: '',
+                    author: ''
+                };
+            },
+            created() {
+                this.loadBooks();
+            },
+            methods: {
+                async loadBooks() {
+                    try {
+                        const response = await axios.get('/books');
+                        console.log("API Response:", response.data);
+
+                        // Manually fill books array if data is an array
+                        const booksArray = Array.isArray(response.data) ? response.data : [];
+                        this.books = booksArray;
+
+                        console.log("Books data:", this.books); 
+                    } catch (error) {
+                        console.error('Error fetching books:', error);
+                        this.books = [];
+                    }
+                },
+                async addBook() {
+                    if (!this.title || !this.author) return;
+
+                    try {
+                        await axios.post('/books', { title: this.title, author: this.author });
+                        this.title = '';
+                        this.author = '';
+                        this.loadBooks(); // Refresh the list after adding a book
+                    } catch (error) {
+                        console.error('Error adding book:', error);
+                    }
+                },
+                async deleteBook(id) {
+                    try {
+                        await axios.delete(`/books/${id}`);
+                        this.loadBooks(); // Refresh the list after deleting a book
+                    } catch (error) {
+                        console.error('Error deleting book:', error);
+                    }
+                },
+                logBook(book) {
+                    console.log("hey", book.title);  // Log the book object when clicked
+                }
+            },
+            template: `
+                {% include 'header.html' %}
+
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col">
+                            <a href="/" class="text-decoration-none">
+                                <span class="material-icons">home</span> Show main
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Add Book Form -->
+                    <div class="row">
+                        <div class="borderme col-md-5 me-4">
+                            <h3>Add book:</h3>
+                            <div class="row">
+                                <div class="col">
+                                    <form @submit.prevent="addBook">
+                                        <div class="row">
+                                            <div class="col">
+                                                Title:
+                                                <input
+                                                    type="text"
+                                                    class="form-control mb-2"
+                                                    placeholder="A New Book"
+                                                    v-model="title"
+                                                    required
+                                                />
+                                            </div>
+                                            <div class="col">
+                                                Author:
+                                                <input
+                                                    type="text"
+                                                    class="form-control mb-2"
+                                                    placeholder="John/Jane Doe"
+                                                    v-model="author"
+                                                    required
+                                                />
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="btn btn-success">Submit</button>
+                                    </form>
+                                </div>
+                            </dvi>
+                        </div>
+                    </div>
+
+                    <!-- Books List -->
+                    <div class="row mt-3">
+                        <div class="borderme col-md-12">
+                            <h3>Books in library:</h3>
+                            <div class="row">
+                                <div v-if="books && books.length === 0">
+                                    <p>No books available</p>
+                                </div>
+                                <div v-else v-for="book in books" :key="book.id" class="col-md-4 col-sm-6 mb-3" @click="logBook(book)">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 v-html="book.title"></h5>
+                                            <p v-html="book.author"></p>
+                                            <button class="btn btn-danger" @click.stop="deleteBook(book.id)">Delete</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% include 'footer.html' %}  
+                </div>
+            `
+        };
+
+        // Create and mount the Vue app
+        createApp(app).mount('#app');
+    </script>
+
+</body>
+</html>

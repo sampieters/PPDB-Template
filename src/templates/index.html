@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Dynamically sets the page title based on app_data dictionary -->
+    <title>{{ app_data['app_name'] }}</title>
+
+    <!-- Favicon for the web page -->
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+
+    <!-- Bootstrap 5 for styling -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS file for additional styling -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='custom.css') }}">
+
+    <!-- jQuery for handling dynamic link updates -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        $(document).ready(function(){
+            // Update the API query URL dynamically based on input fields
+            $('#text, #author').on('input', function() {
+                var text = $('#text').val();
+                var author = $('#author').val();
+                var queryString = '/books?text=' + encodeURIComponent(text) + '&author=' + encodeURIComponent(author);
+                $('#rest-url').attr('href', queryString);   // Update the <a> tag's href
+                $('#rest-url').text(queryString);           // Update the link text
+            });
+
+            // Update the API URL for fetching a book by ID
+            $('#book-id').on('input', function() {
+                var bookId = $('#book-id').val();
+                var newUrl = '/books/' + encodeURIComponent(bookId);
+                $('#book-url').attr('href', newUrl);        // Update the <a> tag's href
+                $('#book-url').text(newUrl);                // Update the link text
+            });
+        });
+    </script>
+</head>
+<body>  
+    <!-- Include a header template -->
+    {% include 'header.html' %}
+    
+    <div class="container-fluid">
+        <div class="row">
+            <div class="borderme col-md-7 me-3">
+                <h3>REST API:</h3>
+
+                <!-- Static GET request for fetching all books -->
+                <div class="row">
+                    <div class="col">
+                        <button class="btn btn-success" id="get-book-btn">GET</button> 
+                        <a class="larger" href="/books" id="book-url-static">/books</a><br/>
+                    </div>
+                </div>
+                
+                <hr class="divider">
+
+                <!-- Static GET request with a predefined query parameter -->
+                <div class="row">
+                    <div class="col">
+                        <button class="btn btn-success" id="get-book-btn">GET</button>
+                        <a class="larger" href="/books?author=Jason Schreier" id="book-url-static">/books?author=Jason Schreier</a><br/>
+                    </div>
+                </div>
+                
+                <hr class="divider">
+
+                <!-- Dynamic GET request to fetch a book by ID -->
+                <div class="row">
+                    <div class="col">
+                        <button class="btn btn-success" id="get-book-btn">GET</button>
+                        <a class="larger" href="/books/1" id="book-url">/books/1</a><br/> 
+                    </div>
+                </div>
+                
+                <hr class="divider">
+
+                <!-- POST request form to add a new book -->
+                <div class="row">
+                    <div class="col">
+                        <form action="/books" method="POST">
+                            <button type="submit" class="btn btn-custom">POST</button>
+                            <span class="fs-5 fw-bold">/books</span><br/>
+                            Body: {<br/>
+                            <div class="d-flex align-items-center mb-2">
+                                &nbsp;&nbsp;&nbsp;&nbsp;<label for="title">"title": </label>
+                                <input id="title" name="title" type="text" class="form-control mb-2 w-50" placeholder="A New Book" required/>
+                            </div>
+                            <div class="d-flex align-items-center mb-2">
+                                &nbsp;&nbsp;&nbsp;&nbsp;<label for="author">"author": </label>
+                                <input id="author" name="author" type="text" class="form-control mb-2 w-50" placeholder="John/Jane Doe" required/>
+                            </div>
+                            }
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- UI Links for different rendering methods -->
+            <div class="borderme col-md-4">
+                <h3>User Interface:</h3>
+                <a class="larger" href="/ssr/classic">Show Library (pure html)</a><br/>
+                <a class="larger" href="/ssr/ajax">Show Library (ajax)</a><br/>
+                <a class="larger" href="/ssr/react">Show Library (react)</a><br/>
+                <a class="larger" href="/ssr/vue">Show Library (vue)</a><br/>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include a footer template -->
+    {% include 'footer.html' %}
+</body>
+</html>

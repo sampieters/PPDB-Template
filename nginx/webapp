@@ -1,0 +1,9 @@
+server {
+    listen 80;
+    server_name 0.0.0.0 team[x].ua-ppdb.me;
+
+    location / {
+        include proxy_params;
+        proxy_pass http://unix:/home/app/PPDB-Template/src/webapp.sock;
+    }
+}

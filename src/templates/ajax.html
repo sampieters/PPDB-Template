@@ -1,0 +1,151 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Dynamically sets the page title based on app_data dictionary -->
+    <title>{{ app_data['app_name'] }}</title>
+
+    <!-- Favicon for the web page -->
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+
+     <!-- Bootstrap 5 for styling -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!--  Google's Material for icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <!-- Custom CSS file for additional styling -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='custom.css') }}">
+
+    <!-- jQuery (used by Bootstrap, but optional for most things in Bootstrap 5) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        function escapeStr(str) {
+            return $("<div>").text(str).html();
+        }
+
+        function load_books(f){
+            $.ajax({url: "/books", type: "GET", dataType: "json"}).done(f);
+        }
+
+        function save_book(title, author, f){
+            $.ajax({url: "/books", type: "POST", data: {'title': title, 'author': author}});
+        }
+
+        function delete_book(bookId) {
+            $.ajax({
+                url: "/books/" + bookId,
+                type: "DELETE",
+                success: function() {
+                    load_books(render_books);  // Reload books after deletion
+                },
+                error: function() {
+                    alert("Error deleting book.");
+                }
+            });
+        }
+
+        function render_books(data) {
+            $("#booksContainer").empty();
+            for (var i = 0; i < data.length; i++) {
+                $("#booksContainer").append(
+                    '<div class="col-md-4 col-sm-6 mb-3 book-item" data-id="' + data[i]['id'] + '">' +
+                        '<div class="card">' +
+                            '<div class="card-body">' +
+                                '<h5 class="card-title">' + escapeStr(data[i]['title']) + '</h5>' +
+                                '<p class="card-text">' + escapeStr(data[i]['author']) + '</p>' +
+                                '<button class="btn btn-danger delete-book" data-id="' + data[i]['id'] + '">Delete</button>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>'
+                );
+            }
+
+            // Add delete functionality to the delete button
+            $(".delete-book").on("click", function() {
+                var bookId = $(this).data("id");
+                delete_book(bookId);  // Trigger the delete request
+            });
+        }
+
+        $(document).ready(function() {
+            load_books(render_books);  // Load books when the page loads
+            $("#addBookForm").on("submit", function(event) {
+                event.preventDefault();
+                var title = $("#title").val();
+                var author = $("#author").val();
+                save_book(title, author);
+                load_books(render_books);  // Reload books after adding a new one
+            });
+        });
+    </script>
+</head>
+<body>    
+    
+    <!-- Include a header template -->
+    {% include 'header.html' %}
+    
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col">
+                <a href="/" class="text-decoration-none">
+                    <span class="material-icons">home</span> Show main
+                </a>
+            </div>
+        </div>
+
+        <!-- Add Book Form -->
+        <div class="row">
+            <div class="borderme col-md-5 me-4">
+                <h3>Add book:</h3>
+                <div class="row">
+                    <div class="col">
+                        <form id="addBookForm">
+                            <div class="row">
+                                <div class="col">
+                                    Title:
+                                    <input 
+                                    id="title" 
+                                    name="title" 
+                                    type="text" 
+                                    class="form-control mb-2" 
+                                    placeholder="A New Book" 
+                                    required/>
+                                </div>
+                                <div class="col">
+                                    Author:
+                                    <input
+                                    id="author"
+                                    name="author"
+                                    type="text"
+                                    class="form-control mb-2"
+                                    placeholder="John/Jane Doe"
+                                    required
+                                    />
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-success">Submit</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Books List -->
+        <div class="row">
+            <div class="borderme col-md-12">
+                <h3>Books in library:</h3>
+                <div class="row" id="booksContainer">
+                    <!-- Books will be loaded here via AJAX -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include a footer template -->
+    {% include 'footer.html' %}  
+</body>
+</html>
