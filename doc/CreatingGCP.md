@@ -1,4 +1,4 @@
-### Create GCP instance
+# Create GCP instance
 
 **1) Access a GCP project and give every team member access**
 
@@ -50,10 +50,9 @@ Now you can create a firewall rule. Specify the following options:
 ![FirewallRule4](./images/img12.png)
 
 **4) Add SSH keys**
-In the VM settings, you can add SSH keys img13
-for each team member. If you don't know how to create this, go to the following file:
+In the VM settings, you can add SSH keys (img13) for each team member. If you don't know how to create this, go to the following file:
 
-(link to new markdown)
+**[Generate an SSH Key Pair](./doc/SSH.md)** 
 
 Copy the contents of your public SSH key, for example ``~/.ssh/id_rsa.pub``, to the VM instance. Go to the VM instance and click on ``Details``:
 

@@ -16,4 +16,9 @@ Follow the sections below in order:
 
 4. **[Running the API on a GCP Instance:](./doc/RunningGCP.md)** Deploy and run your API on the GCP instance.
 
+## Common Problems
+If you encounter any problems during the setup. Consider looking at:
+
+**[Common Problems:](./doc/CommonProblems.md)** 
+
 Happy coding!

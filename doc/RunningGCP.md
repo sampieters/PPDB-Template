@@ -1,4 +1,4 @@
-### Run the API on the GCP instance
+# Run the API on the GCP instance
 These steps demonstrate how to run this application with nginx. They are to be executed in addition to the setup in quick start. Instead of running the built in Flask debug server, we use an industrial grade webserver and reverse proxy server: nginx.
 
 **1) Install dependencies**
@@ -12,12 +12,11 @@ sudo su - app
 ```
 When asked for settings (Full Name, Room Number, ...) just press enter on all values. Then press ``y`` for Yes.
 
-(optional): If running sudo ``sudo su - app`` gives the error **"This account is currently not available."**, you need to fix the app user's settings adn try again:
+(optional): If running sudo ``sudo su - app`` gives the error **"This account is currently not available."**, you need to fix the app user's settings and try again:
 ```bash
 sudo usermod -s /bin/bash app
 sudo su - app
 ```
-
 
 **3) Follow Quick start to setup the project**
 
@@ -43,7 +42,7 @@ sudo systemctl enable webapp
 sudo systemctl start webapp
 ```
 
-A file ``src/ProgDBTutor/webapp.sock`` should be created.
+A file ``src/webapp.sock`` should be created.
 
 **6) Setup nginx**
 
@@ -63,7 +62,7 @@ server {
 
     location / {
         include proxy_params;
-        proxy_pass http://unix:/home/app/PPDB-Template/src/ProgDBTutor/webapp.sock;
+        proxy_pass http://unix:/home/app/PPDB-Template/src/webapp.sock;
     }
 }
 ```
