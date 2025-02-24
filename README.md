@@ -18,7 +18,6 @@ Follow the sections below in order:
 
 ## Common Problems
 If you encounter any problems during the setup. Consider looking at:
-
-**[Common Problems:](./doc/CommonProblems.md)** 
+**[Common Problems](./doc/CommonProblems.md)** 
 
 Happy coding!
